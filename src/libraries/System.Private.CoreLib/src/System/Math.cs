@@ -64,13 +64,12 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Abs(int value)
         {
+            //branchless computation, as documented in https://graphics.stanford.edu/~seander/bithacks.html#IntegerAbs
+            var signMask = value >> 31;
+            value = (value + signMask) ^ signMask;
             if (value < 0)
             {
-                value = -value;
-                if (value < 0)
-                {
-                    ThrowNegateTwosCompOverflow();
-                }
+                ThrowNegateTwosCompOverflow();
             }
             return value;
         }
@@ -78,13 +77,12 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long Abs(long value)
         {
+            //branchless computation, as documented in https://graphics.stanford.edu/~seander/bithacks.html#IntegerAbs
+            var signMask = value >> 63;
+            value = (value + signMask) ^ signMask;
             if (value < 0)
             {
-                value = -value;
-                if (value < 0)
-                {
-                    ThrowNegateTwosCompOverflow();
-                }
+                ThrowNegateTwosCompOverflow();
             }
             return value;
         }
