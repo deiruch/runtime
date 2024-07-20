@@ -13,6 +13,30 @@ namespace System.Runtime.InteropServices
     public static class CollectionsMarshal
     {
         /// <summary>
+        /// Get a <see cref="Memory{T}"/> view over a <see cref="List{T}"/>'s data.
+        /// Items should not be added or removed from the <see cref="List{T}"/> while the <see cref="Memory{T}"/> is in use.
+        /// </summary>
+        /// <param name="list">The list to get the data view over.</param>
+        /// <typeparam name="T">The type of the elements in the list.</typeparam>
+        public static Memory<T> AsMemory<T>(List<T> list)
+        {
+            ArgumentNullException.ThrowIfNull(list);
+            
+            int size = list._size;
+            T[] items = list._items;
+            Debug.Assert(items is not null, "Implementation depends on List<T> always having an array.");
+
+            if ((uint)size > (uint)items.Length)
+            {
+                // List<T> was erroneously mutated concurrently with this call, leading to a count larger than its array.
+                ThrowHelper.ThrowInvalidOperationException_ConcurrentOperationsNotSupported();
+            }
+
+            Debug.Assert(typeof(T[]) == list._items.GetType(), "Implementation depends on List<T> always using a T[] and not U[] where U : T.");
+            return new Memory<T>(items, 0, size);
+        }
+        
+        /// <summary>
         /// Get a <see cref="Span{T}"/> view over a <see cref="List{T}"/>'s data.
         /// Items should not be added or removed from the <see cref="List{T}"/> while the <see cref="Span{T}"/> is in use.
         /// </summary>
